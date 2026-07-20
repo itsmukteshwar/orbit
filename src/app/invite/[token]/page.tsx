@@ -333,12 +333,14 @@ export default function InvitePage() {
       .then((payload) => setState({ kind: "form", payload }))
       .catch((err: Error) => {
         const msg = err.message as "EXPIRED" | "REVOKED" | "ACCEPTED" | "INVALID";
-        const kindMap: Record<string, PageState["kind"]> = {
+        type TerminalKind = "invalid" | "expired" | "revoked" | "accepted";
+        const kindMap: Record<string, TerminalKind> = {
           EXPIRED: "expired",
           REVOKED: "revoked",
           ACCEPTED: "accepted",
         };
-        setState({ kind: kindMap[msg] ?? "invalid" });
+        const kind: TerminalKind = kindMap[msg] ?? "invalid";
+        setState({ kind });
       });
   }, [token]);
 
