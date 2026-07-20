@@ -115,7 +115,7 @@ export default function ImportWizardPage() {
         // Auto-guess mapping
         const guessed = {} as Record<TargetKey, string>;
         for (const target of TARGET_FIELDS) {
-          const match = hdrs.find((h) => target.aliases.includes(h.trim().toLowerCase()));
+          const match = hdrs.find((h) => (target.aliases as string[]).includes(h.trim().toLowerCase()));
           if (match) guessed[target.key] = match;
         }
         setMapping(guessed);

@@ -333,11 +333,12 @@ export default function InvitePage() {
       .then((payload) => setState({ kind: "form", payload }))
       .catch((err: Error) => {
         const msg = err.message as "EXPIRED" | "REVOKED" | "ACCEPTED" | "INVALID";
-        setState({
-          kind: (["EXPIRED", "REVOKED", "ACCEPTED"].includes(msg)
-            ? msg.toLowerCase()
-            : "invalid") as PageState["kind"],
-        });
+        const kindMap: Record<string, PageState["kind"]> = {
+          EXPIRED: "expired",
+          REVOKED: "revoked",
+          ACCEPTED: "accepted",
+        };
+        setState({ kind: kindMap[msg] ?? "invalid" });
       });
   }, [token]);
 
@@ -440,6 +441,7 @@ export default function InvitePage() {
   }
 
   /* ── Form (new user or existing) ── */
+  if (state.kind !== "form") return null;
   const { payload } = state;
 
   return (

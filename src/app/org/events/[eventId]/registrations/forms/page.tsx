@@ -416,7 +416,7 @@ export default function FormBuilderPage() {
                 schema={schema}
                 compact={previewMobile}
                 submitLabel="Register"
-                onSubmit={() => toastSuccess("Preview submit OK — validation passed")}
+                onSubmit={() => { toastSuccess("Preview submit OK — validation passed"); }}
               />
             </div>
           </div>
