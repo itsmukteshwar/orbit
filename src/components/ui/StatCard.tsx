@@ -30,10 +30,40 @@ interface StatCardProps {
   trend?: { text: string; positive: boolean };
   /** Muted context line after the trend chip. */
   hint?: string;
+  /**
+   * StatTile extension (P-04): numeric delta — auto-formats into the trend
+   * chip ("+412" / "-3.4%"). Ignored when `trend` is provided explicitly.
+   */
+  delta?: { value: number; suffix?: string; positiveIsGood?: boolean };
+  /** StatTile extension (P-04): renders a skeleton placeholder while data loads. */
+  loading?: boolean;
 }
 
 /** KPI card with a coloured left accent border — the Orbit dashboard stat style. */
-export function StatCard({ label, value, icon: Icon, accent = "primary", trend, hint }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, accent = "primary", trend, hint, delta, loading }: StatCardProps) {
+  if (loading) {
+    return (
+      <article className={cn("rounded-xl border-l-4 bg-white p-5 shadow-card", ACCENT_BORDER[accent])} aria-busy="true">
+        <div className="flex items-center gap-3">
+          <span className="h-11 w-11 shrink-0 animate-pulse rounded-lg bg-slate-100" />
+          <div className="min-w-0 flex-1">
+            <span className="mb-2 block h-2.5 w-24 animate-pulse rounded bg-slate-100" />
+            <span className="block h-5 w-16 animate-pulse rounded bg-slate-100" />
+          </div>
+        </div>
+      </article>
+    );
+  }
+
+  const resolvedTrend =
+    trend ??
+    (delta
+      ? {
+          text: `${delta.value > 0 ? "+" : ""}${delta.value.toLocaleString("en-IN")}${delta.suffix ?? ""}`,
+          positive: (delta.positiveIsGood ?? true) ? delta.value >= 0 : delta.value < 0,
+        }
+      : undefined);
+
   return (
     <article className={cn("rounded-xl border-l-4 bg-white p-5 shadow-card", ACCENT_BORDER[accent])}>
       <div className="flex items-center gap-3">
@@ -45,16 +75,16 @@ export function StatCard({ label, value, icon: Icon, accent = "primary", trend, 
           <p className="font-display text-xl font-semibold text-orbit-900">{value}</p>
         </div>
       </div>
-      {(trend || hint) && (
+      {(resolvedTrend || hint) && (
         <p className="mt-2 text-[12px] leading-none">
-          {trend && (
+          {resolvedTrend && (
             <span
               className={cn(
                 "mr-1.5 inline-block rounded-full px-1.5 py-0.5 font-semibold",
-                trend.positive ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600",
+                resolvedTrend.positive ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600",
               )}
             >
-              {trend.text}
+              {resolvedTrend.text}
             </span>
           )}
           {hint && <span className="text-slate-400">{hint}</span>}

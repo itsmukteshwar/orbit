@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
-import { NAV_SECTIONS, type BadgeTone } from "@/config/navigation";
+import { NAV_SECTIONS, type BadgeTone, type NavSection } from "@/config/navigation";
 import { OrbitLogo } from "@/components/layout/OrbitLogo";
 import { cn } from "@/lib/utils";
 
@@ -23,13 +23,15 @@ interface SidebarProps {
   /** Mobile: whether the sidebar drawer is open. */
   mobileOpen: boolean;
   onMobileClose: () => void;
+  /** P-06: context-aware section list (defaults to the legacy tree). */
+  sections?: NavSection[];
 }
 
 /**
  * Text sidebar listing every navigation section. Exactly one section is
  * expanded at a time; the rest collapse to their titles (accordion).
  */
-export function Sidebar({ activeSectionId, onToggleSection, mobileOpen, onMobileClose }: SidebarProps) {
+export function Sidebar({ activeSectionId, onToggleSection, mobileOpen, onMobileClose, sections = NAV_SECTIONS }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -64,7 +66,7 @@ export function Sidebar({ activeSectionId, onToggleSection, mobileOpen, onMobile
 
         {/* Sections */}
         <nav className="flex-1 space-y-0.5 overflow-y-auto px-3 py-3">
-          {NAV_SECTIONS.map((section) => {
+          {sections.map((section) => {
             const Icon = section.icon;
             const isOpen = section.id === activeSectionId;
             return (

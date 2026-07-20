@@ -21,3 +21,9 @@ npm-debug.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# playwright
+/playwright-report/
+/test-results/
+# NOTE: tests/visual/__snapshots__/ is intentionally NOT ignored.
+# Baseline PNG files must be committed so CI can diff against them.

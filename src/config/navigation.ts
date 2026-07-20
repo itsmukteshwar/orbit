@@ -11,8 +11,14 @@ import {
   Building2,
   LifeBuoy,
   Blocks,
+  BadgeCheck,
+  MessageSquare,
+  Settings,
+  UsersRound,
+  Utensils,
   type LucideIcon,
 } from "lucide-react";
+import type { Role } from "@/types/domain";
 
 export type BadgeTone = "primary" | "success" | "warning" | "danger" | "secondary";
 
@@ -29,6 +35,8 @@ export interface NavSection {
   icon: LucideIcon;
   category: string;
   items: NavItem[];
+  /** Roles allowed to see this section. Omit = visible to everyone. */
+  roles?: Role[];
 }
 
 /**
@@ -149,6 +157,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Tenants",
     icon: Building2,
     category: "Administration",
+    roles: ["super_admin"],
     items: [
       { label: "Organizers", href: "#", badge: { text: "148", tone: "primary" } },
       { label: "Subscriptions & Billing", href: "#" },
@@ -161,6 +170,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Operations",
     icon: LifeBuoy,
     category: "Administration",
+    roles: ["super_admin"],
     items: [
       { label: "Support Tickets", href: "#", badge: { text: "3", tone: "danger" } },
       { label: "Announcements", href: "#" },
@@ -184,9 +194,209 @@ export const NAV_SECTIONS: NavSection[] = [
 ];
 
 /** Returns the section that owns the given pathname, falling back to the first section. */
-export function findSectionByPath(pathname: string): NavSection {
+export function findSectionByPath(pathname: string, sections: NavSection[] = NAV_SECTIONS): NavSection {
   return (
-    NAV_SECTIONS.find((section) => section.items.some((item) => item.href !== "#" && pathname.startsWith(item.href))) ??
-    NAV_SECTIONS[0]
+    sections.find((section) => section.items.some((item) => item.href !== "#" && pathname.startsWith(item.href))) ??
+    sections[0]
   );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * P-06 — Context-aware navigation (Blueprint §6)
+ * Three contexts, driven by route:
+ *   EVENT  /org/events/[id]/…  → the §6.3 event module sidebar
+ *   ORG    /org/…              → org-level tree
+ *   LEGACY everything else     → the original NAV_SECTIONS (canon pages)
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+export type NavContext = "legacy" | "org" | "event";
+
+const MANAGER_ROLES: Role[] = ["owner", "org_admin", "event_manager", "super_admin"];
+const OPS_ROLES: Role[] = ["desk", "scanner", "food_operator", "catering_supervisor"];
+
+/** Org-level tree (Blueprint §6.2): Dashboard / Events / Team / Reports / Settings. */
+export const ORG_SECTIONS: NavSection[] = [
+  {
+    id: "org-dashboard",
+    label: "Dashboard",
+    icon: LayoutDashboard,
+    category: "Organization",
+    items: [{ label: "Overview", href: "/org/dashboard" }],
+  },
+  {
+    id: "org-events",
+    label: "Events",
+    icon: CalendarDays,
+    category: "Organization",
+    items: [
+      { label: "All Events", href: "/org/events" },
+      { label: "Create Event", href: "/org/events/new" },
+    ],
+  },
+  {
+    id: "org-team",
+    label: "Team",
+    icon: UsersRound,
+    category: "Organization",
+    roles: ["owner", "org_admin", "super_admin"],
+    items: [
+      { label: "Members & Roles", href: "/org/team" },
+      { label: "Invitations", href: "/org/team/invitations" },
+    ],
+  },
+  {
+    id: "org-reports",
+    label: "Reports",
+    icon: BarChart3,
+    category: "Organization",
+    items: [
+      { label: "Cross-event Analytics", href: "/org/reports" },
+      { label: "Exports", href: "/org/reports/exports" },
+    ],
+  },
+  {
+    id: "org-settings",
+    label: "Settings",
+    icon: Settings,
+    category: "Organization",
+    roles: ["owner", "org_admin", "super_admin"],
+    items: [
+      { label: "Organization Profile", href: "/org/settings" },
+      { label: "Billing & Plan", href: "/org/settings/billing" },
+      { label: "Integrations", href: "/org/settings/integrations" },
+    ],
+  },
+];
+
+/** Event module tree (Blueprint §6.3), scoped to one event id. */
+export function eventSections(eventId: string): NavSection[] {
+  const base = `/org/events/${eventId}`;
+  return [
+    {
+      id: "evt-overview",
+      label: "Overview",
+      icon: LayoutDashboard,
+      category: "Event",
+      items: [{ label: "Event Dashboard", href: `${base}/overview` }],
+    },
+    {
+      id: "evt-registrations",
+      label: "Registrations",
+      icon: ClipboardList,
+      category: "Event",
+      roles: [...MANAGER_ROLES, "desk"],
+      items: [
+        { label: "All Visitors", href: `${base}/registrations` },
+        { label: "Register New", href: `${base}/registrations/new` },
+        { label: "Approvals", href: `${base}/registrations/approvals`, badge: { text: "18", tone: "warning" } },
+        { label: "Form Builder", href: `${base}/registrations/forms` },
+        { label: "Categories", href: `${base}/registrations/categories` },
+      ],
+    },
+    {
+      id: "evt-exhibitors",
+      label: "Exhibitors",
+      icon: Store,
+      category: "Event",
+      roles: MANAGER_ROLES,
+      items: [
+        { label: "All Exhibitors", href: `${base}/exhibitors` },
+        { label: "Staff Badges", href: `${base}/exhibitors/staff` },
+        { label: "Stall Allocation", href: `${base}/exhibitors/stalls` },
+        { label: "Lead Retrieval", href: `${base}/exhibitors/leads` },
+      ],
+    },
+    {
+      id: "evt-badges",
+      label: "Badges",
+      icon: BadgeCheck,
+      category: "Event",
+      roles: [...MANAGER_ROLES, "desk"],
+      items: [
+        { label: "Badge Templates", href: `${base}/badges` },
+        { label: "Print Queue", href: `${base}/badges/print-queue` },
+        { label: "Reprint Log", href: `${base}/badges/reprints` },
+      ],
+    },
+    {
+      id: "evt-checkin",
+      label: "Check-in",
+      icon: ScanLine,
+      category: "Event",
+      roles: [...MANAGER_ROLES, "scanner"],
+      items: [
+        { label: "Gates & Devices", href: `${base}/checkin` },
+        { label: "Entry / Exit Logs", href: `${base}/checkin/logs` },
+      ],
+    },
+    {
+      id: "evt-food",
+      label: "Food",
+      icon: Utensils,
+      category: "Event",
+      roles: [...MANAGER_ROLES, "food_operator", "catering_supervisor"],
+      items: [
+        { label: "Meal Windows", href: `${base}/food` },
+        { label: "Redemption Log", href: `${base}/food/redemptions` },
+        { label: "Counters", href: `${base}/food/counters` },
+      ],
+    },
+    {
+      id: "evt-comm",
+      label: "Communications",
+      icon: MessageSquare,
+      category: "Event",
+      roles: MANAGER_ROLES,
+      items: [
+        { label: "Templates", href: `${base}/communications` },
+        { label: "Message Log", href: `${base}/communications/messages` },
+      ],
+    },
+    {
+      id: "evt-reports",
+      label: "Reports",
+      icon: BarChart3,
+      category: "Event",
+      roles: MANAGER_ROLES,
+      items: [
+        { label: "Analytics", href: `${base}/reports` },
+        { label: "Exports", href: `${base}/reports/exports` },
+      ],
+    },
+    {
+      id: "evt-settings",
+      label: "Settings",
+      icon: Settings,
+      category: "Event",
+      roles: MANAGER_ROLES,
+      items: [
+        { label: "Event Settings", href: `${base}/settings` },
+        { label: "Danger Zone", href: `${base}/settings/danger` },
+      ],
+    },
+  ];
+}
+
+const EVENT_PATH_RE = /^\/org\/events\/([^/]+)\//;
+
+/** Resolves which nav tree a pathname belongs to. */
+export function resolveNavContext(pathname: string): { context: NavContext; eventId?: string } {
+  const eventMatch = EVENT_PATH_RE.exec(pathname + "/");
+  if (eventMatch && eventMatch[1] !== "new") return { context: "event", eventId: eventMatch[1] };
+  if (pathname.startsWith("/org")) return { context: "org" };
+  return { context: "legacy" };
+}
+
+/** Returns the role-filtered sections for the current route. */
+export function getNavSections(pathname: string, role: Role): NavSection[] {
+  const { context, eventId } = resolveNavContext(pathname);
+  const sections =
+    context === "event" && eventId ? eventSections(eventId) : context === "org" ? ORG_SECTIONS : NAV_SECTIONS;
+  const visible = sections.filter((s) => !s.roles || s.roles.includes(role));
+  /* Ops roles in the legacy tree only see their operational sections. */
+  if (context === "legacy" && OPS_ROLES.includes(role)) {
+    const opsAllowed = new Set(["dashboards", "visitors", "registration", "onsite-ops"]);
+    return visible.filter((s) => opsAllowed.has(s.id));
+  }
+  return visible;
 }

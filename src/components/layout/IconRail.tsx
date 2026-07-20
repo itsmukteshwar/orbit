@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { NAV_SECTIONS } from "@/config/navigation";
+import { NAV_SECTIONS, type NavSection } from "@/config/navigation";
 import { OrbitLogo } from "@/components/layout/OrbitLogo";
 import { cn } from "@/lib/utils";
 
@@ -10,13 +10,15 @@ interface IconRailProps {
   activeSectionId: string;
   /** Expands the given section in the text sidebar. */
   onSelectSection: (sectionId: string) => void;
+  /** P-06: context-aware section list (defaults to the legacy tree). */
+  sections?: NavSection[];
 }
 
 /**
  * Narrow icon strip on the far left — one icon per navigation section.
  * Clicking an icon expands that section in the text sidebar (accordion).
  */
-export function IconRail({ activeSectionId, onSelectSection }: IconRailProps) {
+export function IconRail({ activeSectionId, onSelectSection, sections = NAV_SECTIONS }: IconRailProps) {
   return (
     <nav
       aria-label="Section shortcuts"
@@ -30,7 +32,7 @@ export function IconRail({ activeSectionId, onSelectSection }: IconRailProps) {
         <OrbitLogo size={22} />
       </Link>
 
-      {NAV_SECTIONS.map((section) => {
+      {sections.map((section) => {
         const Icon = section.icon;
         const isActive = section.id === activeSectionId;
         return (
