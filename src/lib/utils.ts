@@ -11,6 +11,11 @@ export function formatIndian(value: number): string {
   return value.toLocaleString("en-IN");
 }
 
+/** Formats paise (integer) as an INR string e.g. ₹1,42,381. */
+export function formatPaise(paise: number): string {
+  return "₹" + (paise / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 /** Declarative number-format spec — safe to pass from Server to Client Components. */
 export interface ValueFormat {
   prefix?: string;
