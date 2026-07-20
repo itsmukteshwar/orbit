@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { NAV_SECTIONS, type BadgeTone, type NavSection } from "@/config/navigation";
@@ -55,8 +54,10 @@ export function Sidebar({ activeSectionId, onToggleSection, mobileOpen, onMobile
       >
         {/* Brand */}
         <div className="flex shrink-0 items-center justify-center border-b border-slate-100 px-4 py-3">
-          <Image src="/images/orbit-logo.png" alt="Orbit" width={28} height={28} className="lg:hidden shrink-0 object-contain mr-2" unoptimized />
-          <Image src="/images/org.png" alt="Orbit Event ERP" width={148} height={40} className="w-auto h-auto max-h-10 object-contain" unoptimized />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/orbit-logo.png" alt="Orbit" width={28} height={28} className="lg:hidden shrink-0 object-contain mr-2" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/org.png" alt="Orbit Event ERP" className="w-auto max-h-10 object-contain" />
         </div>
 
         {/* Sections */}
