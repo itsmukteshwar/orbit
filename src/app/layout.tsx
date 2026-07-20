@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${poppins.variable} bg-surface font-sans text-[0.875rem] text-slate-700`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${poppins.variable} bg-surface font-sans text-[0.875rem] text-slate-700`}>
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

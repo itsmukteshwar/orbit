@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { NAV_SECTIONS, type NavSection } from "@/config/navigation";
-import { OrbitLogo } from "@/components/layout/OrbitLogo";
 import { cn } from "@/lib/utils";
 
 interface IconRailProps {
@@ -27,9 +27,9 @@ export function IconRail({ activeSectionId, onSelectSection, sections = NAV_SECT
       <Link
         href="/dashboard/super-admin"
         aria-label="Orbit home"
-        className="mb-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orbit-900"
+        className="mb-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orbit-900 overflow-hidden"
       >
-        <OrbitLogo size={22} />
+        <Image src="/images/orbit-logo.png" alt="Orbit Event ERP" width={36} height={36} className="object-contain" />
       </Link>
 
       {sections.map((section) => {
