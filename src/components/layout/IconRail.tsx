@@ -29,7 +29,7 @@ export function IconRail({ activeSectionId, onSelectSection, sections = NAV_SECT
         aria-label="Orbit home"
         className="mb-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orbit-900 overflow-hidden"
       >
-        <Image src="/images/orbit-logo.png" alt="Orbit Event ERP" width={36} height={36} className="object-contain" />
+        <Image src="/images/orbit-logo.png" alt="Orbit Event ERP" width={36} height={36} className="object-contain" unoptimized />
       </Link>
 
       {sections.map((section) => {
